@@ -16,6 +16,8 @@ Numerous systems exist that hold and exchange hash addressed blocks:
 * all blockchains
 * IPFS/IPLD
 * ssb
+* doltdb
+* Bittorrent/WebTorrent
 
 Each has at least one custom format for the exchange of those blocks.
 None of these formats were designed to interop with each other except
@@ -46,25 +48,67 @@ in the same order in the BLOCKS section.
 The DIGESTS section is an encoding of every
 [ DIGEST, OFFSET, BLOCK_LENGTH ] and since the
 largest of all these values was encoded in the HEADER
+the length of all these sections is fixed.
 
+So, in a single 24 byte header, we've got a perfect HASH
+TABLE encoding that we can seek into for fast inclusion
+checks.
 
-So, in a single 24 byte header, we've got a perfect HAMT
-encoding of a deterministic length.
+All the efficient Set() operations we want to do against
+databases and Block Sets() we can get out of this, whether
+it's in-memory or on-disc.
 
-So, we can deterministically seek into it to check for inclusions.
-Pretty cool :)
+If you don't care about IPFS/IPLD then this is all you would
+care about in terms of how the format looks. The encoding
+of each BLOCK gets into some details regarding the preservation
+of CID information and how to encode root identifiers into the
+blocks in a deterministic way. If you do care about these things
+just bear with me and trust that after 5 years of IPLD I'm
+not gonna mess this part up and have the problems we all
+know about well considered :)
 
-In fact, whether in-memory or on-disc, we have an incredibly
-efficient encoding. You'll only find a more efficient encoding
-if you're will to lose prescition or implement a small MAX SIZE
-you can memory map, but as I'll show later, there's VERY efficient
-means of serializing these to disc safely in modern file systems
-using `writev`.
+One thing to note is that if you do end up with one hash DIGEST
+that is much larger than all the rest there's a performance
+penalty as all the DIGESTs will take up that amount of space.
+This is a very theoretical problem, most CAR files today have
+hashes of all the same length, but if this penalty were ever
+to become noticable once could just use a different box for
+each differing length.
 
+# As a Database
 
+Here's how you can preserve transactional integrity at the filesystem
+layer in a very efficient manor that is likely to outperform most
+of what has been built.
 
+A database will typically hold some amount of state in memory as
+it builds a transaction and then finally COMMITs that transation.
+This happens much the same way you build state in your local git
+checkout before a COMMIT.
 
+The state it builds in memory is usually a hybrid of CACHE it has
+accumulated from disc and pending alterations to that state and
+other new information.
 
+Since data being written to the BOX can be prepared in an already
+efficient sort order, it provides optimization even to the in-memory
+cache. Data that needs to be read from the BOX can use deterministic
+predictions to efficiently find the location of data in a single read
+or just memory map the entire DIGESTS section if it's small enough,
+which is typically will be. The fact that you don't have to
+do anything else to it and it's already as fast a data structure
+as your builtin types is pretty amazing.
 
-
-The largest offset in the 
+When you commit the change to disc you have a few options available
+to you depending on where you wanna make a CAP tradeoff:
+* You can edit the existing file in-place and risk leaving the file
+  in an inconsistent state.
+* You could write a new file of the new database, which sounds expensive
+  but because you know all the insertion points you can build efficient
+  `writev` calls and even work with some `sendfile()` operations.
+* But honestly, what you're probably going to want to do if you want a really
+  fast database is have MORE THAN ONE FILE. You've got incredibly performant
+  search operations once you've read the header, so write a few of them
+  and compact them over time, which isn't a big deal because
+* Compaction turns out to be pretty cheap when you're concatenating Sets()
+   together :) 
