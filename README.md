@@ -2,7 +2,7 @@
 
 Universal hash addressed block container.
 * incrementally verifiable
-* high performance proof inclusions (ondics and in-memory)
+* high performance proof inclusions (on-disc and in-memory)
 * fully deterministic encoding
 
 Which makes it a performant means of exchanging block sets
