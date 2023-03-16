@@ -30,8 +30,10 @@ since this is literally an idea i just had).
 
 The format (BOX) is split into a HEADER, DIGESTS and BLOCKS section.
 
-The length of the DIGESTS is visible after doing a single 32 byte read
-(4 64bit integers) of the HEADER.
+The DIGESTS read paramaters (length, predictive positioning, etc) 
+is computed from a single 32 byte read (4 64bit integers) of the HEADER.
+With this, efficient lookups can be performed to find the location of any
+BLOCK in the BOX.
 
 These 3 integers represent the following values:
 * The size, in bytes, of the LARGEST hash DIGEST.
@@ -61,6 +63,26 @@ checks.
 All the efficient Set() operations we want to do using 
 Block Sets() we can get out of this, whether
 it's in-memory or on-disc.
+
+Since each section provides the information for fast seeking
+into the subsequent section you can parse, and build optimizations,
+in the following way:
+* `read(0, 32)` gives you the HEADER, which gives you fast seeking
+into the DIGESTS section.
+  * You can load these into memory when a program initializes and even
+    store this HEADER anywhere you reference the BOX since it's only 32
+    bytes, which would allow you to seek into the DIGESTs on first read.
+* Based on the size of the digests and the deterministic position of the hash
+  DIGEST, you can then perform a single and relatively small read into the
+  DIGESTS that is deterministically guaranteed to provide the index.
+  you're looking for (or tell you that the DIGEST isn't in this Set())
+  * For most use cases, these DIGESTS sections are pretty small and
+    if a program wishes to it can just load the whole section into memory
+    or even store this section apart from the blocks section if it
+    represents a performance gain based on locality.
+* Once you've read the OFFSET and BLOCK_LENGTH from the DIGESTS section
+  you can predict the exact byte range you need to use to read the BLOCK
+  from the BLOCKs section.
 
 If you don't care about IPFS/IPLD then this is all you would
 care about in terms of how the format looks. The encoding
