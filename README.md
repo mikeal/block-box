@@ -93,16 +93,21 @@ The state it builds in-memory is usually a hybrid of CACHE it has
 accumulated from disc, pending alterations to that state, and
 other new information being added.
 
-Since data being written to the BOX can be prepared in an already
-efficient sort order, it provides optimization even to the in-memory
-cache. Data that needs to be read from the BOX can use deterministic
-predictions to efficiently find the location of data in a single read
-or just memory map the entire DIGESTS section if it's small enough,
-which it typically will be. The fact that you don't have to
-do anything else to it and it's already as fast a data structure
-as your builtin types is pretty amazing.
+Since data being written to the BOX is stored in an already
+efficient sort order (whether on-disc or in-memory), 
+it offers a highly optimized binary structure already widely
+used and understood to be of the highest potential performance.
 
-When you commit the change to disc you have a few options available
+Data that is read from the BOX can use deterministic
+predictions to efficiently find the location of a DIGEST on-disc and in-memory. 
+
+The fact that you don't have to
+do anything else to it and it's already as fast a data structure
+as your builtin types is pretty amazing. As is most often the case,
+the total DIGESTS will be small enough that you can quickly load the
+entire on-disc state into memory.
+
+When you commit a change of the in-memory state to disc you have a few options available
 to you depending on where you wanna make a CAP tradeoff:
 * You can edit the existing file in-place and risk leaving the file
   in an inconsistent state.
