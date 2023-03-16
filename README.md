@@ -23,7 +23,7 @@ Each has at least one custom format for the exchange of those blocks.
 None of these formats were designed to interop with each other except
 for IPFS/IPLD's CAR format and it's indeterministic and has none of
 the other features of block-box (but is currently in much broader use
-since this is literally and idea i just had).
+since this is literally an idea i just had).
 
 # Format
 
