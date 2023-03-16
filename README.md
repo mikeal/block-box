@@ -39,7 +39,7 @@ These 3 integers represent the following values:
 * The size, in bytes, of the LARGEST hash DIGEST.
 * The size, in bytes, of the LARGEST block OFFSET (from BLOCKS section start).
 * The size, in bytes, of the LARGEST BLOCK_LENGTH.
-* The number of DIGESTS in the BOX.
+* The number of TOTAL_DIGESTS in the BOX.
 
 With this information we can determine the optimal integer format
 of the OFFSET and BLOCK_LENGTH encodings and all digests
@@ -80,6 +80,12 @@ into the DIGESTS section.
     if a program wishes to it can just load the whole section into memory
     or even store this section apart from the blocks section if it
     represents a performance gain based on locality.
+  * When the whole structure is in memory looks get even faster since you
+    can hold a collection binary views already indexed by offset. Simple
+    math will give you the ideal offset to start a lookup or inclusion check
+    `const start_offset = Math.floor(TOTAL_DIGESTS / (256 / hash[0]))` where
+    `hash[0]` can be replaced with larger number parsing when the size of TOTAL_DIGESTS
+    is larger than MAX_UINT8 (256) for greater precision.
 * Once you've read the OFFSET and BLOCK_LENGTH from the DIGESTS section
   you can predict the exact byte range you need to use to read the BLOCK
   from the BLOCKs section.
