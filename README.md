@@ -58,8 +58,8 @@ In a single 24 byte header, we've got a perfect HASH
 TABLE encoding that we can seek into for fast inclusion
 checks.
 
-All the efficient Set() operations we want to do against
-databases and Block Sets() we can get out of this, whether
+All the efficient Set() operations we want to do using 
+Block Sets() we can get out of this, whether
 it's in-memory or on-disc.
 
 If you don't care about IPFS/IPLD then this is all you would
