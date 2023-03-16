@@ -38,8 +38,11 @@ These 3 integers represent the following values:
 * The size, in bytes, of the LARGEST BLOCK_LENGTH.
 * The number of DIGESTS in the BOX.
 
-All digests smaller than the LARGEST DIGEST will be
-zero filled.
+With this information we can determine the optimal integer format
+of the OFFSET and BLOCK_LENGTH encodings and all digests
+smaller than the LARGEST DIGEST will be
+zero filled which means the size of the DIGESTS can be determined
+from the HEADER read.
 
 All digests in the BOX MUST appear in binary sort order
 in both the DIGESTS and their corresponding block data
@@ -50,7 +53,7 @@ The DIGESTS section is an encoding of every
 largest of all these values was encoded in the HEADER
 the length of all these sections is fixed.
 
-So, in a single 24 byte header, we've got a perfect HASH
+In a single 24 byte header, we've got a perfect HASH
 TABLE encoding that we can seek into for fast inclusion
 checks.
 
@@ -64,16 +67,15 @@ of each BLOCK gets into some details regarding the preservation
 of CID information and how to encode root identifiers into the
 blocks in a deterministic way. If you do care about these things
 just bear with me and trust that after 5 years of IPLD I'm
-not gonna mess this part up and have the problems we all
-know about well considered :)
+not gonna mess this up :)
 
 One thing to note is that if you do end up with one hash DIGEST
 that is much larger than all the rest there's a performance
 penalty as all the DIGESTs will take up that amount of space.
-This is a very theoretical problem, most CAR files today have
+This is a very theoretical problem, most applications have
 hashes of all the same length, but if this penalty were ever
-to become noticable once could just use a different box for
-each differing length.
+to become noticable one could just use a different box for
+each differing length to overcome it.
 
 # As a Database
 
@@ -86,16 +88,16 @@ it builds a transaction and then finally COMMITs that transation.
 This happens much the same way you build state in your local git
 checkout before a COMMIT.
 
-The state it builds in memory is usually a hybrid of CACHE it has
-accumulated from disc and pending alterations to that state and
-other new information.
+The state it builds in-memory is usually a hybrid of CACHE it has
+accumulated from disc, pending alterations to that state, and
+other new information being added.
 
 Since data being written to the BOX can be prepared in an already
 efficient sort order, it provides optimization even to the in-memory
 cache. Data that needs to be read from the BOX can use deterministic
 predictions to efficiently find the location of data in a single read
 or just memory map the entire DIGESTS section if it's small enough,
-which is typically will be. The fact that you don't have to
+which it typically will be. The fact that you don't have to
 do anything else to it and it's already as fast a data structure
 as your builtin types is pretty amazing.
 
@@ -109,6 +111,7 @@ to you depending on where you wanna make a CAP tradeoff:
 * But honestly, what you're probably going to want to do if you want a really
   fast database is have MORE THAN ONE FILE. You've got incredibly performant
   search operations once you've read the header, so write a few of them
-  and compact them over time, which isn't a big deal because
+  out so you don't have to do in-place edits and then compact every once
+  in a while, which isn't a big deal because
 * Compaction turns out to be pretty cheap when you're concatenating Sets()
    together :) 
