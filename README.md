@@ -1,9 +1,10 @@
 # block-box
 
 Universal hash addressed block container.
+* fully deterministic verifiable encoding
 * incrementally verifiable
-* high performance proof inclusions (on-disc and in-memory)
-* fully deterministic encoding
+* high performance inclusion checks (on-disc and in-memory)
+* high performace insert and removal (on-disc and in-memory)
 
 Which makes it a performant means of exchanging block sets
 across memory, networks and is even a high performance
