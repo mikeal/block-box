@@ -73,8 +73,8 @@ into the DIGESTS section.
     store this HEADER anywhere you reference the BOX since it's only 32
     bytes, which would allow you to seek into the DIGESTs on first read.
 * Based on the size of the digests and the deterministic position of the hash
-  DIGEST, you can then perform a single and relatively small read into the
-  DIGESTS that is deterministically guaranteed to provide the index.
+  DIGEST you wish to seek into, you can then perform a single and relatively small read into the
+  DIGESTS that is deterministically guaranteed to provide the index
   you're looking for (or tell you that the DIGEST isn't in this Set())
   * For most use cases, these DIGESTS sections are pretty small and
     if a program wishes to it can just load the whole section into memory
