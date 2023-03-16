@@ -29,8 +29,8 @@ since this is literally an idea i just had).
 
 The format (BOX) is split into a HEADER, DIGESTS and BLOCKS section.
 
-The length of the HEADER is visible after doing a single 24 byte read
-(3 64bit integers).
+The length of the DIGESTS is visible after doing a single 24 byte read
+(3 64bit integers) of the HEADER.
 
 These 3 integers represent the following values:
 * The size, in bytes, of the LARGEST hash DIGEST.
