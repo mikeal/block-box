@@ -357,3 +357,5 @@ as a DIGEST with referent BLOCK offsets and lengths in the BOX.
 
 It includes all DIGESTs appearing in all recursively encoded BOXes in the BLOCKS section.
 
+Since the size of this DIGEST is a fairly precise measure of the cost of indexing the contents of a BOX, so
+it should be quite useful in pricing the cost of making the data within a BOX available.
