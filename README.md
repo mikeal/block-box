@@ -75,28 +75,30 @@ These 3 integers represent the following values:
 * The size, in bytes, of the LARGEST BLOCK_LENGTH.
 * The number of TOTAL_DIGESTS in the BOX.
 
-With this information we can determine the optimal integer format
-of the OFFSET and BLOCK_LENGTH encodings and all digests
-smaller than the LARGEST DIGEST will be
-zero filled which means the size of the DIGESTS can be determined
-from the HEADER read.
-
-All digests in the BOX MUST appear in binary sort order
-in both the DIGESTS and their corresponding block data
-in the same order in the BLOCKS section.
-
 The DIGESTS section is an encoding of every
 [ DIGEST, OFFSET, BLOCK_LENGTH ] and since the
 largest of all these values was encoded in the HEADER
 the length of all these sections is fixed.
 
-In a single 24 byte header, we've got a perfect HASH
-TABLE encoding that we can seek into for fast inclusion
-checks.
+This means the HEADER contains all the information we need to know 
+* the optimal integer encoding of the OFFSET and BLOCK_LENGTH
+* and since all digests smaller than the LARGEST DIGEST will be
+   zero filled the encoding of each DIGEST is now a static
+   variable
+* which in combination can be used to determine the total length
+  of the DIGESTS section.
 
-All the efficient Set() operations we want to do using 
-Block Sets() we can get out of this, whether
-it's in-memory or on-disc.
+DIGESTS MUST be encoded in binary sort order, which means:
+* For the cost of a 32 byte header, we've got a perfect HASH
+  TABLE encoding that we can seek into for fast inclusion
+  checks.
+* All the efficient Set() operations we want to do using 
+  Block Sets() we can get out of this, whether
+  it's in-memory or on-disc.
+  
+The details of BLOCKS encoding is covered much lower.
+
+# Simple Parser Walk-Through
 
 Since each section provides the information for fast seeking
 into the subsequent section you can parse, and build optimizations,
@@ -123,14 +125,6 @@ into the DIGESTS section.
 * Once you've read the OFFSET and BLOCK_LENGTH from the DIGESTS section
   you can predict the exact byte range you need to use to read the BLOCK
   from the BLOCKs section.
-
-If you don't care about IPFS/IPLD then this is all you would
-care about in terms of how the format looks. The encoding
-of each BLOCK gets into some details regarding the preservation
-of CID information and how to encode root identifiers into the
-blocks in a deterministic way. If you do care about these things
-just bear with me and trust that after 5 years of IPLD I'm
-not gonna mess this up :)
 
 One thing to note is that if you do end up with one hash DIGEST
 that is much larger than all the rest there's a performance
@@ -204,13 +198,13 @@ multihash. This is already the case with certain addresses in Filecoin that use
 both the codec and multihash space.
 
 Because the focus in IPLD too often fixates on treating it like a Graph in order
-to support existing indeterminsitic representations that are modeled as graphs,
-it remains unclear to many how many problems can be solved working with Set()
+to support existing indeterminsitic representations modeled as graphs,
+it remains unclear to many how many problems can be solved working with Set() operations
 in the block representations because that serialization layer has been difficult
 to evolve.
 
 From this point on, this project uses the IPLD `codec` and `multihash` to signal
-change between different formats and in certain ways program behavior variance
+change between different formats and program behavior variance
 through those address spaces.
 * Some have fully deterministic block encodings,
 * Some don't have fully determinstic block encodings but remain incrementally verifiable.
@@ -218,7 +212,9 @@ through those address spaces.
   * This is exciting because, when these are stored in a remote location, the client
     can produce Range() requests into the remote without an expensive round-trip for
     the HEADER.
-    
+* Some are designed to implement block storage.
+* Some are designed to implement **hash addresses indexes** (pointers from one hash address to another).
+
 ## BLOCK
 
 Each individual BLOCK is encoded in two sections. The first section
@@ -227,17 +223,37 @@ encoded as 4 VARINTs `[ CIDv, CODEC, MULTIHASH_CODE, MULTIHASH_LENGTH, ]`.
 CIDv0 is encoded as `[ 0, 0, MULTIHASH_CODE, MULTIHASH_LENGTH ]`
 where only the MULTIHASH_CODE allowed in CIDv0 is permitted.
 
-The LENGTH is never in this section, **the OFFSET and BLOCK_LENGTH are
-only ever encoded into the DIGESTS section**.
+The BLOCK_LENGTH is never in this section, **the OFFSET and BLOCK_LENGTH are
+only ever encoded into the DIGESTS section**. So the rest
+of the data is the BYTE data that validates with against the refering
+`multihash`.
+
+It should be noted at this point the BOX standard is recursive!
+
+If this block has a `block-box` CID, the corresponding block
+data can be verfied incrementally. There's really no reason
+not to implement this recursion in most storage systems, and
+this makes this format an obvious choice for streaming use
+cases because you can stream as much block data as you have
+at any moment and, whatever the size of the serialization, it
+will be entirely verifiable.
+
+Aggregators can simply stream into a box, with any level of depth
+they wish. There's no limit because the resulting recusion can
+be implemented in a memory safe way and is guaranteed not to include
+cycles because... we've never left the safety of full verifiability.
+
+Storage systems can easily parse the structure and discover all
+blocks regardless of the number of aggregations and depth and flatten
+the representation through Set() combinations, which we already
+know is the fastest way to do it.
 
 ## `block-box` codecs and multihashes
 
 A `block-box` doesn't have a single fixed `code`, but most
 codes can be used as both a `codec` and a `multihash` code
 and the `multihash` includes other `multihashes` for
-wide ranging compatibility and future proofing. Hashes
-are getting better all the time, we need to start thinking
-recursively in order to move power through these systems.
+wide ranging compatibility and future proofing.
 
 When used as a `codec` this indicates the BLOCKS are encoded in
 the sort order of the DIGESTS table. This can be incrementally
