@@ -10,6 +10,22 @@ Which makes it a performant means of exchanging block sets
 across memory, networks and is even a high performance
 ondisc database format.
 
+How fast are we talking?
+
+Local operations (read, insert, bulk inclusion checks) into 
+the data structure is comparable to native Map()
+implementations and, given access to low level primitives, could
+beat performance.
+
+Serialization of the data structure, because it's already prepared
+for serialization, is about as fast as you can write a vector of
+bytes and does not require a single memcopy operation (outside of
+number-to-byte conversions in certain languages).
+
+Within the realm of "hash addressed blocks" you should be able
+to write these as fast your program can access the related bytes
+and move them to the desired space in memory, disc, or network.
+
 ## What is a "hash addressed block container?"
 
 Numerous systems exist that hold and exchange hash addressed blocks:
