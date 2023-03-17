@@ -384,5 +384,5 @@ database use cases.
 
 If you know the content root, you can verify its inclusion quickly by hashing the content root CID
 and checking for it in the DIGEST, so we don't lose fast inclusion checks of content roots when you
-know them, but the referent needs to hold 
+know them by writing it as a BLOCK.
 
