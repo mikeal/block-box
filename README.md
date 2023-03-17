@@ -273,7 +273,7 @@ used and encoded into this new compound MULTIHASH which
 we can use in combination with the `codec`, so these
 features of "fatness" in the pointer make their
 way into CID in a seamless way because they arrive
-in the form of verificability improvements to the `multihash`
+in the form of verifiability improvements to the `multihash`
 address space.
 
 Note that ALL of these multihashes represent full verifiability of all the others.
