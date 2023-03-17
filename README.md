@@ -382,6 +382,7 @@ the entire BOX section. This is a stark reversal from the CAR format, but this a
 the root to be appended to the end of a BLOCKS section as it changes, as is the case in many
 database use cases.
 
-If you know the content root, you can verify its inclusion quickly by calculating the double-hash
-and checking for it in the DIGEST.
+If you know the content root, you can verify its inclusion quickly by hashing the content root CID
+and checking for it in the DIGEST, so we don't lose fast inclusion checks of content roots when you
+know them, but the referent needs to hold 
 
