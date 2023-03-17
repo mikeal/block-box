@@ -255,16 +255,17 @@ codes can be used as both a `codec` and a `multihash` code
 and the `multihash` includes other `multihashes` for
 wide ranging compatibility and future proofing.
 
-When used as a `codec` this indicates the BLOCKS are encoded in
-the sort order of the DIGESTS table. This can be incrementally
-verified as the DIGESTS section is parsed. The `multihash`
-will correspond to the BOX as a whole.
+When a `codec` is used and THE SAME `
 
 When used as a `multihash`, this indicated the hash digest
 is encoded as one of the following:
 * [ 0, HEADER, MULTIHASH of the BOX ]
 * [ 1, HEADER, MULTIHASH of the DIGESTS ]
 * [ 2, HEADER, MULTIHASH of the BOX, MULTIHASH of the DIGESTS ]
+* [ 3, HEADER, MULTIHASH of the BLOCKS ]
+* [ 4, HEADER, MULTIHASH of the BLOCKS, MULTIHASH of the BOX ]
+* [ 5, HEADER, MULTIHASH of the BLOCKS, MULTIHASH of the DIGESTS ]
+* [ 6, HEADER, MULTIHASH of the BLOCKS, MULTIHASH of the BOX, MULTIHASH of the DIGESTS ]
 
 Since we've got multihashes in multihashes, any method
 we ever want to use to verify each section can be
@@ -274,4 +275,14 @@ features of "fatness" in the pointer make their
 way into CID in a seamless way because they arrive
 in the form of verificability improvements to the `multihash`
 address space.
+
+Note that ALL of these multihashes represent full verifiability of all the others.
+Since the order of the BLOCK data determines the data in the DIGESTS section
+a new DIGEST section can be produced from the BLOCKS section and verified, and
+the same is true of the HEADER. These are the sorts of properties we get with fully
+deterministic representations, because even when the BLOCKS section is a
+stream of blocks encoded in an indeterministic order the DIGESTS section
+produced from those blocks in that order are fully determinsitic.
+
+
 
