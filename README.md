@@ -190,22 +190,22 @@ a lot more now, and projects like store-the-hash have demonstrated how it's ofte
 worth the effort to write hash aware on-disc block stores because we really can
 beat the performance of anything anyone has built for general purpose solutions.
 
-Another thing that the IPLD community has lost sight of in the discussion of "fat
-pointers" is that we can actually do a lot more with the existing CID and multihash
-address space with fully deterministic representations because incremental
+We can actually do a lot more with the existing CID and multihash
+address space through deterministic representation because incremental
 verifiabilty can be modeled and addressed as a form of validation and thus a valid
 multihash. This is already the case with certain addresses in Filecoin that use
-both the codec and multihash space.
+both the codec and multihash space. The fact that, in addition to validation,
+these same variables would allow for fast seeking and inclusion checks doesn't
+mean they don't belong in the multihash :)
 
-Because the focus in IPLD too often fixates on treating it like a Graph in order
-to support existing indeterminsitic representations modeled as graphs,
-it remains unclear to many how many problems can be solved working with Set() operations
-in the block representations because that serialization layer has been difficult
-to evolve.
+Most of the discussion regarding data transfer in IPFS/IPLD is focused on the Graph
+layer because it appears as though that's where the performance is slow. Were graph
+representations and operations to be serialized into `block-box` for exchange many
+problems that today look like Graph problems will become Set() problems, and therefor
+easier to solve and the way to optimize them will be clear.
 
 From this point on, this project uses the IPLD `codec` and `multihash` to signal
-change between different formats and program behavior variance
-through those address spaces.
+different formats and program behavior variance through those address spaces.
 * Some have fully deterministic block encodings,
 * Some don't have fully determinstic block encodings but remain incrementally verifiable.
 * Some **include the HEADER!**
@@ -214,18 +214,23 @@ through those address spaces.
     the HEADER.
 * Some are designed to implement block storage.
 * Some are designed to implement **hash addresses indexes** (pointers from one hash address to another).
+* Since all of this is accomplished in the form of addressing, all of these forms
+  retain the appearance of a BLOCK themselves which enables recursive composition that
+  can be used for streaming and aggregation protocols.
+ 
+You can tell the `block-box` retains the benefits of determinism throughout because
+all the characteristics of pure functional systems show up :)
 
 ## BLOCK
 
 Each individual BLOCK is encoded in two sections. The first section
 is the CID_PREFIX information related to the hash DIGEST. This is
-encoded as 4 VARINTs `[ CIDv, CODEC, MULTIHASH_CODE, MULTIHASH_LENGTH, ]`.
-CIDv0 is encoded as `[ 0, 0, MULTIHASH_CODE, MULTIHASH_LENGTH ]`
-where only the MULTIHASH_CODE allowed in CIDv0 is permitted.
+encoded as 4 VARINTs `[ CIDv, CODEC, MULTIHASH_CODE, MULTIHASH_LENGTH ]`.
+CIDv0 is encoded as `[ 0, 0, 0, SHA256_HASH_LENGTH ]`.
 
 The BLOCK_LENGTH is never in this section, **the OFFSET and BLOCK_LENGTH are
 only ever encoded into the DIGESTS section**. So the rest
-of the data is the BYTE data that validates with against the refering
+of the data is the BYTE data that validates against the refering
 `multihash`.
 
 It should be noted at this point the BOX standard is recursive!
@@ -315,9 +320,23 @@ and the BLOCKS section could be an append-only file, for instance. In the case o
 failure that corrupts the DIGESTS you could regenerate it from the BLOCKS section.
 This makes for a pretty safe and high performance database.
 
-## `cid-map-box`
+## `cid-index-box`
 
 * `code`: TBD
 * appears as a `codec` and `multihash`
 
-OFFSET is encoded 
+A `block-box` where the BYTE value of every BLOCK is a referring CID turns out to
+be a very good cid indexing structure to keep and move around when you're working
+with lots of hashes :)
+
+This box represents a deterministically generated `index`. As such, its verifiability
+is limited to parties that have the logic that produced the index and the block
+data being referred to in the CID value.
+
+This also means the index is "blind" containing only hashes and meta data. Any actor
+that has the means to verify the index can attest to its validity and address that
+includes the digest of the BLOCKS section.
+
+This provides a means of exchanging verifiable claims about many hash references at
+once, and the index itself is held and serialized in a high performance Set().
+
