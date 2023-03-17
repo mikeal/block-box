@@ -270,6 +270,14 @@ is encoded as one of the following:
 * [ 4, HEADER, MULTIHASH of the BLOCKS, MULTIHASH of the BOX ]
 * [ 5, HEADER, MULTIHASH of the BLOCKS, MULTIHASH of the DIGESTS ]
 * [ 6, HEADER, MULTIHASH of the BLOCKS, MULTIHASH of the BOX, MULTIHASH of the DIGESTS ]
+* [ 7, HEADER, MULTIHASH of the AGGREGATED_DIGEST ]
+* [ 8, HEADER, MULTIHASH of the AGGREGATED_DIGEST, MULTIHASH of the BOX ]
+* [ 9, HEADER, MULTIHASH of the AGGREGATED_DIGEST, MULTIHASH of the DIGESTS ]
+* [ 10, HEADER, MULTIHASH of the AGGREGATED_DIGEST, MULTIHASH of the BLOCKS ]
+* [ 11, HEADER, MULTIHASH of the AGGREGATED_DIGEST, MULTIHASH of the BOX, MULTIHASH of the DIGESTS ]
+* [ 12, HEADER, MULTIHASH of the AGGREGATED_DIGEST MULTIHASH of the BLOCKS, MULTIHASH of the BOX ]
+* [ 13, HEADER, MULTIHASH of the AGGREGATED_DIGEST MULTIHASH of the BLOCKS, MULTIHASH of the DIGESTS ]
+* [ 14, HEADER, MULTIHASH of the AGGREGATED_DIGEST MULTIHASH of the BLOCKS, MULTIHASH of the BOX, MULTIHASH of the DIGESTS, MULTIHASH of the BLOCKS ]
 
 Since we've got multihashes in multihashes, any method
 we ever want to use to verify each section can be
@@ -338,4 +346,14 @@ includes the digest of the BLOCKS section.
 
 This provides a means of exchanging verifiable claims about many hash references at
 once, and the index itself is held and serialized in a high performance Set().
+
+## `aggregate-digest`
+
+* `code`: TBD
+* only appears as a `codec`
+
+This is the result of a recursive Set() merge of all `block-box`es in a BOX encoded
+as a DIGEST with referent BLOCK offsets and lengths in the BOX.
+
+It includes all DIGESTs appearing in all recursively encoded BOXes in the BLOCKS section.
 
