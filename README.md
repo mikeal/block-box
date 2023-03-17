@@ -334,7 +334,7 @@ is limited to parties that have the logic that produced the index and the block
 data being referred to in the CID value.
 
 This also means the index is "blind" containing only hashes and meta data. Any actor
-that has the means to verify the index can attest to its validity and address that
+that has the means to verify the index can sign claims about the index using an address that
 includes the digest of the BLOCKS section.
 
 This provides a means of exchanging verifiable claims about many hash references at
