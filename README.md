@@ -359,3 +359,29 @@ It includes all DIGESTs appearing in all recursively encoded BOXes in the BLOCKS
 
 Since the size of this DIGEST is a fairly precise measure of the cost of indexing the contents of a BOX, so
 it should be quite useful in pricing the cost of making the data within a BOX available.
+
+## `content-root`
+
+* `code`: TBD
+* only appears as a `codec`
+
+The BYTE value of this codec is a CID containing the content root in the BOX. Some systems
+MAY restrict this to a single root, some MAY NOT.
+
+Since adding root metadata constitute a change to the BOX, it is implemented as another BLOCK
+occuring with it, which is encurs predictable but limited Block Set() variance when and only
+when it is necessary.
+
+Since the verifiable meaning of "root" is an application layer concern, these protocols do
+not define addressing mechanism that include this root. It is often desirable to hold this
+reference elsewhere where the mutability is being maintained rather than in the verifiability
+layer of `multihash`.
+
+Since the root is encoded this way, you can't determine the root of the BOX without parsing
+the entire BOX section. This is a stark reversal from the CAR format, but this allows for
+the root to be appended to the end of a BLOCKS section as it changes, as is the case in many
+database use cases.
+
+If you know the content root, you can verify its inclusion quickly by calculating the double-hash
+and checking for it in the DIGEST.
+
