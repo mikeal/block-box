@@ -214,8 +214,32 @@ where only the MULTIHASH_CODE allowed in CIDv0 is permitted.
 The LENGTH is never in this section, **the OFFSET and BLOCK_LENGTH are
 only ever encoded into the DIGESTS section**.
 
-## deterministic-block-box
+## `block-box` codecs and multihashes
 
-* `code`: TBD
+A `block-box` doesn't have a single fixed `code`, but most
+codes can be used as both a `codec` and a `multihash` code
+and the `multihash` includes other `multihashes` for
+wide ranging compatibility and future proofing. Hashes
+are getting better all the time, we need to start thinking
+recursively in order to move power through these systems.
 
-When used as a `codec` this indicates the BLOCKS are entirely encoded 
+When used as a `codec` this indicates the BLOCKS are encoded in
+the sort order of the DIGESTS table. This can be incrementally
+verified as the DIGESTS section is parsed. The `multihash`
+will correspond to the BOX as a whole.
+
+When used as a `multihash`, this indicated the hash digest
+is encoded as one of the following:
+* [ 0, HEADER, MULTIHASH of the BOX ]
+* [ 1, HEADER, MULTIHASH of the DIGESTS ]
+* [ 2, HEADER, MULTIHASH of the BOX, MULTIHASH of the DIGESTS ]
+
+Since we've got multihashes in multihashes, any method
+we ever want to use to verify each section can be
+used and encoded into this new compound MULTIHASH which
+we can use in combination with the `codec`, so these
+features of "fatness" in the pointer make their
+way into CID in a seamless way because they arrive
+in the form of verificability improvements to the `multihash`
+address space.
+
