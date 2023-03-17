@@ -217,7 +217,7 @@ different formats and program behavior variance through those address spaces.
   retain the appearance of a BLOCK themselves which enables recursive composition that
   can be used for streaming and aggregation protocols.
  
-You can tell the `block-box` retains the benefits of determinism throughout because
+You can tell `block-box` retains the benefits of determinism throughout because
 all the characteristics of pure functional systems show up :)
 
 ## BLOCK
