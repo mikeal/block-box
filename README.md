@@ -23,7 +23,7 @@ bytes and does not require a single memcopy operation (outside of
 number-to-byte conversions in certain languages).
 
 Within the realm of "hash addressed blocks" you should be able
-to write these as fast your program can access the related bytes
+to serialize these as fast your program can access the related bytes
 and move them to the desired space in memory, disc, or network.
 
 ## What is a "hash addressed block container?"
@@ -36,14 +36,14 @@ Numerous systems exist that hold and exchange hash addressed blocks:
 * doltdb
 * Bittorrent/WebTorrent
 
-Each has at least one custom format for the exchange of those blocks.
+Each has at least one custom format and/or transport for the exchange of those blocks.
 None of these formats were designed to interop with each other except
 for IPFS/IPLD's CAR format and it's indeterministic and has none of
-the other features of block-box (but is currently in much broader use
+the other features of `block-box` (but is currently in much broader use
 since this is literally an idea i just had).
 
 To the extent that these systems have performance issues regarding the
-exchange of block data and perfomant Set() combinations with that data,
+exchange of block data and performant Block Set() combinations with that data,
 it can be traced to the fact that these layers have never completely
 considered the potential perfomance gains in binary serialization available
 when the data is **already hashed**.
@@ -62,10 +62,10 @@ forward would be evident up the stack where power is being lost elsewhere.
 
 # Format
 
-The format (BOX) is split into a HEADER, DIGESTS and BLOCKS section.
+The format (BOX) is split into a HEADER, DIGESTS and BLOCKS sections.
 
 The DIGESTS read paramaters (length, predictive positioning, etc) 
-is computed from a single 32 byte read (4 64bit integers) of the HEADER.
+is computed from a single 32 byte (4 64bit integers) HEADER.
 With this, efficient lookups can be performed to find the location of any
 BLOCK in the BOX.
 
@@ -83,8 +83,7 @@ the length of all these sections is fixed.
 This means the HEADER contains all the information we need to know 
 * the optimal integer encoding of the OFFSET and BLOCK_LENGTH
 * and since all digests smaller than the LARGEST DIGEST will be
-   zero filled the encoding of each DIGEST is now a static
-   variable
+   zero filled the encoding size of each DIGEST is static,
 * which in combination can be used to determine the total length
   of the DIGESTS section.
 
