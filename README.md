@@ -282,7 +282,42 @@ a new DIGEST section can be produced from the BLOCKS section and verified, and
 the same is true of the HEADER. These are the sorts of properties we get with fully
 deterministic representations, because even when the BLOCKS section is a
 stream of blocks encoded in an indeterministic order the DIGESTS section
-produced from those blocks in that order are fully determinsitic.
+produced from those blocks in that order is **still fully determinsitic**.
 
+That's why we'll start with a fully deterministic encoding.
 
+## `deterministic-block-box`
 
+* `code`: TBD
+* appears as a `codec` and `multihash`
+
+The BLOCKS section MUST be encoded in the same binary sort order as the DIGESTS.
+
+Note that, variances in CID can produce box variants for each CID variant, so
+indeterminism in CID prefixes is considered uniquely different.
+
+## `streaming-block-box`
+
+* `code`: TBD
+* appears as a `codec` and `multihash`
+
+The BLOCKS section is encoded in an indeterminstic order, as is the case
+when streaming data into an append-only file.
+
+Note that this can't be used directly as a "network stream" because the DIGESTS
+still must be encoded in binary sort order and appear before the block data.
+However, the "network stream" use case is solved using recursive block boxes
+which was covered earlier.
+
+Since the DIGESTS and BLOCKS sections can be addressed independently, it may
+be common to store them separately. The DIGESTS could be a memmapped file
+and the BLOCKS section could be an append-only file, for instance. In the case of a
+failure that corrupts the DIGESTS you could regenerate it from the BLOCKS section.
+This makes for a pretty safe and high performance database.
+
+## `cid-map-box`
+
+* `code`: TBD
+* appears as a `codec` and `multihash`
+
+OFFSET is encoded 
