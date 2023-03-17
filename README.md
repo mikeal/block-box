@@ -259,9 +259,10 @@ codes can be used as both a `codec` and a `multihash` code
 and the `multihash` includes other `multihashes` for
 wide ranging compatibility and future proofing.
 
-When a `codec` is used and THE SAME `
+When used as a `codec` it indicates the type of box being referred to,
+which may have impacts on the meaning and verificability rules of BOX contents.
 
-When used as a `multihash`, this indicated the hash digest
+When used as a `multihash`, this indicates the hash digest
 is encoded as one of the following:
 * [ 0, HEADER, MULTIHASH of the BOX ]
 * [ 1, HEADER, MULTIHASH of the DIGESTS ]
@@ -297,6 +298,9 @@ stream of blocks encoded in an indeterministic order the DIGESTS section
 produced from those blocks in that order is **still fully determinsitic**.
 
 That's why we'll start with a fully deterministic encoding.
+
+Since the HEADER is included in the MULTIHASH form these addresses offer
+fast seeking into the DIGEST for lookups and inclusion checks.
 
 ## `deterministic-block-box`
 
