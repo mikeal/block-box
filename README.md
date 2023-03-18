@@ -191,13 +191,15 @@ all the characteristics of pure functional systems show up :)
 
 Each individual BLOCK is encoded in two sections. The first section
 is the CID_PREFIX information related to the hash DIGEST. This is
-encoded as 4 VARINTs `[ CIDv, CODEC, MULTIHASH_CODE, MULTIHASH_LENGTH ]`.
-CIDv0 is encoded as `[ 0, 0, 0, SHA256_HASH_LENGTH ]`.
+encoded as 5 VARINTs `[ CIDv, CODEC, MULTIHASH_CODE, MULTIHASH_LENGTH, BYTE_LENGTH ]`.
+CIDv0 is encoded as `[ 0, 0, 0, SHA256_HASH_LENGTH, BYTE_LENGTH ]`.
 
-The BLOCK_LENGTH is never in this section, **the OFFSET and BLOCK_LENGTH are
-only ever encoded into the DIGESTS section**. So the rest
-of the data is the BYTE data that validates against the refering
-`multihash`.
+The BYTE_LENGTH is encoded here so that a BLOCKS section can be recursively parsed
+and deterministically derive the DIGEST and HEADER when streamed.
+This means we can stream only the BLOCKS portion, retain incremental
+verifiability, and arrive at the same proof and all resulting
+hash based addresses without having the need to pre-compute this
+proof before transmission began.
 
 It should be noted at this point the BOX standard is recursive!
 
