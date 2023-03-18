@@ -6,7 +6,10 @@ Universal hash addressed block container.
 * high performance inclusion checks (on-disc and in-memory)
 * high performace insert and removal (on-disc and in-memory)
 
-Which makes it a performant means of exchanging block sets
+Basically, it's a binary serialization of a hash table
+that maps digests to their corresponding block data.
+
+Which makes it a performant means of exchanging Block Sets()
 across memory, networks and is even a high performance
 ondisc database format.
 
