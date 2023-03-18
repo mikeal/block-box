@@ -98,43 +98,7 @@ DIGESTS MUST be encoded in binary sort order, which means:
   Block Sets() we can get out of this, whether
   it's in-memory or on-disc.
   
-The details of BLOCKS encoding is covered much lower.
-
-# Simple Parser Walk-Through
-
-Since each section provides the information for fast seeking
-into the subsequent section you can parse, and build optimizations,
-in the following way:
-* `read(0, 32)` gives you the HEADER, which gives you fast seeking
-into the DIGESTS section.
-  * You can load these into memory when a program initializes and even
-    store this HEADER anywhere you reference the BOX since it's only 32
-    bytes, which would allow you to seek into the DIGESTs on first read.
-* Based on the size of the digests and the deterministic position of the hash
-  DIGEST you wish to seek into, you can then perform a single and relatively small read into the
-  DIGESTS that is deterministically guaranteed to provide the index
-  you're looking for (or tell you that the DIGEST isn't in this Set())
-  * For most use cases, these DIGESTS sections are pretty small and
-    if a program wishes to it can just load the whole section into memory
-    or even store this section apart from the blocks section if it
-    represents a performance gain based on locality.
-  * When the whole structure is in memory looks get even faster since you
-    can hold a collection binary views already indexed by offset. Simple
-    math will give you the ideal offset to start a lookup or inclusion check
-    `const start_offset = Math.floor(TOTAL_DIGESTS / (256 / hash[0]))` where
-    `hash[0]` can be replaced with larger number parsing when the size of TOTAL_DIGESTS
-    is larger than MAX_UINT8 (256) for greater precision.
-* Once you've read the OFFSET and BLOCK_LENGTH from the DIGESTS section
-  you can predict the exact byte range you need to use to read the BLOCK
-  from the BLOCKs section.
-
-One thing to note is that if you do end up with one hash DIGEST
-that is much larger than all the rest there's a performance
-penalty as all the DIGESTs will take up that amount of space.
-This is a very theoretical problem, most applications have
-hashes of all the same length, but if this penalty were ever
-to become noticable one could just use a different box for
-each differing length to overcome it.
+The details of BLOCKS encoding is covered below.
 
 # As a Database
 
