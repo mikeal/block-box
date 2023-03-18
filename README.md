@@ -344,8 +344,7 @@ The BYTE value of this codec is a CID containing the content root in the BOX. So
 MAY restrict this to a single root, some MAY NOT.
 
 Since adding root metadata constitute a change to the BOX, it is implemented as another BLOCK
-occuring with it, which is encurs predictable but limited Block Set() variance when and only
-when it is necessary.
+occuring with it.
 
 Since the verifiable meaning of "root" is an application layer concern, these protocols do
 not define addressing mechanism that include this root. It is often desirable to hold this
