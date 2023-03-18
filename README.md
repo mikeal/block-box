@@ -183,6 +183,8 @@ different formats and program behavior variance through those address spaces.
 * Since all of this is accomplished in the form of addressing, all of these forms
   retain the appearance of a BLOCK themselves which enables recursive composition that
   can be used for streaming and aggregation protocols.
+* Since a BLOCKS steam can incrementally derive an agreed upon DIGEST and HEADER,
+  we can agree upon proof states without having to compute them ahead of time.
  
 You can tell `block-box` retains the benefits of determinism throughout because
 all the characteristics of pure functional systems show up :)
