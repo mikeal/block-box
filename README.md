@@ -196,16 +196,16 @@ is the CID_PREFIX information related to the hash DIGEST. This is
 encoded as 5 VARINTs `[ CIDv, CODEC, MULTIHASH_CODE, MULTIHASH_LENGTH, BYTE_LENGTH ]`.
 CIDv0 is encoded as `[ 0, 0, 0, SHA256_HASH_LENGTH, BYTE_LENGTH ]`.
 
-The BYTE_LENGTH is encoded here so that a BLOCKS section can be recursively parsed
-and deterministically derive the DIGEST and HEADER when streamed.
-This means we can stream only the BLOCKS portion, retain incremental
-verifiability, and arrive at the same proof and all resulting
+The BYTE_LENGTH is encoded here so that a BLOCKS section can be incrementally parsed
+and deterministically derive the DIGEST and HEADER.
+This means we stream incrementally verifiable Block Sets(),
+and at all times arrive at the same proof and resulting
 hash based addresses without having the need to pre-compute this
 proof before transmission began.
 
 It should be noted at this point the BOX standard is recursive!
 
-If this block has a `block-box` CID, the corresponding block
+If a BLOCK has a `block-box` CID, the corresponding block
 data can be verfied incrementally. There's really no reason
 not to implement this recursion in most storage systems, and
 this makes this format an obvious choice for streaming use
