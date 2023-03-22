@@ -67,12 +67,12 @@ forward would be evident up the stack where power is being lost elsewhere.
 
 The format (BOX) is split into a HEADER, DIGESTS and BLOCKS sections.
 
-The DIGESTS read paramaters (length, predictive positioning, etc) 
+The DIGESTS read parameters (length, predictive positioning, etc) 
 is computed from a single 32 byte (4 64bit integers) HEADER.
 With this, efficient lookups can be performed to find the location of any
 BLOCK in the BOX.
 
-These 3 integers represent the following values:
+These 4 integers represent the following values:
 * The size, in bytes, of the LARGEST hash DIGEST.
 * The size, in bytes, of the LARGEST block OFFSET (from BLOCKS section start).
 * The size, in bytes, of the LARGEST BLOCK_LENGTH.
@@ -152,7 +152,7 @@ First, we should acklowdge that CAR has served us well but is probably the slowe
 version of a solution to this problem that we'll have from this point forward.
 
 We just didn't have enough experience to design something great back then. We know
-a lot more now, and projects like store-the-hash have demonstrated how it's often
+a lot more now, and projects like [store-the-hash] have demonstrated how it's often
 worth the effort to write hash aware on-disc block stores because we really can
 beat the performance of anything anyone has built for general purpose solutions.
 
@@ -360,3 +360,4 @@ If you know the content root, you can verify its inclusion quickly by hashing th
 and checking for it in the DIGEST, so we don't lose fast inclusion checks of content roots when you
 know them by writing it as a BLOCK.
 
+[store-the-hash]: https://github.com/vmx/storethehash
