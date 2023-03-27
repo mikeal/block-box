@@ -1,0 +1,16 @@
+{
+  "name": "block-box",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Universal hash addressed block container. * fully deterministic verifiable encoding * incrementally verifiable * high performance inclusion checks (on-disc and in-memory) * high performace insert and removal (on-disc and in-memory)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "varint-vectors": "^1.0.1"
+  }
+}
