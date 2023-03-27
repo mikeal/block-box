@@ -1,6 +1,8 @@
 import { encoding_length } from 'varint-vectors'
 import { createHash, randomBytes } from 'node:crypto'
 
+const MAXUINT8 = 255
+const MAXUINT16 = 65535
 const MAXUINT32 = 4294967295
 const INTSIZE = Uint32Array.BYTES_PER_ELEMENT
 
@@ -28,16 +30,36 @@ class InMemory/*32*/ {
   }
   find (digest) {
     if (!this.entries.length) return [ 0, false ]
-    let offset = (new Uint32Array(
-      digest.buffer, digest.byteOffset, digest.byteOffset + INTSIZE)
+
+    let NUMBER
+    let MAX
+
+    if (this.entries.length <= MAXUINT8) {
+      NUMBER = Uint8Array
+      MAX = MAXUINT8
+    } else if (this.entries.length <= MAXUINT16) {
+      NUMBER = Uint16Array
+      MAX = MAXUINT16
+    } else if (this.entries.length <= MAXUINT32) {
+      NUMBER = Uint32Array
+      MAX = MAXUINT32
+    } else {
+      throw new Error('Out of range, this is not a 64b implementation')
+    }
+    const num = new NUMBER(
+      digest.buffer, digest.byteOffset, digest.byteOffset + NUMBER.BYTES_PER_ELEMENT
     )[0]
-    // there's more efficient math here that avoids floating
-    // point calculations, by traversing down each byte in the
-    // hash exactly as long as it is useful based on the size
-    // of the digests list, but this is good enough for now.
-    offset = Math.floor(
-      this.entries.length / ( offset / MAXUINT32 )
-    )
+
+    let offset = Math.floor(( num / MAX) * this.entries.length)
+    const prediction = offset
+
+    /*
+    console.log({
+      offset, num, MAX, l: this.entries.length,
+      f: (num / MAX),
+      d: ( this.entries.length / MAX )
+    })
+    */
 
     let i = 0
     let open_less = true
@@ -93,6 +115,9 @@ class InMemory/*32*/ {
       }
     }
   }
+  has (digest) {
+    return this.find(digest)[1]
+  }
   insert ({ digest, block }) {
     const [ offset, found ] = this.find(digest)
     if (found) return // already in the set
@@ -119,7 +144,7 @@ class InMemory/*32*/ {
       digest, block, [ this.blockOffset, block_size ]
     ])
     this.blockOffset = this.blockOffest + block_size
-    this.verify()
+    // this.verify()
   }
   encode () {
     return Buffer.concat(this.encodeVector())
@@ -149,19 +174,19 @@ class InMemory/*32*/ {
         if (digest[i] === last[i]) throw new Error('Duplicate entry')
       }
       last = digest
+      if (!this.has(digest)) throw new Error('Failed inclusion check')
     }
   }
 }
 
-const inmem = new InMemory()
+let inmem = new InMemory()
 
-const slab = randomBytes(1024)
+const slab = randomBytes(1024 * 2)
 const range = size => [...Array(size).keys()]
 
-const views = range(1023).flatMap((x, i) => {
-  return [ slab.subarray(0, i), slab.subarray(i) ]
+const views = range(slab.byteLength - 1).flatMap(i => {
+  return range(i).map(l => slab.subarray(i, l))
 })
-.filter(bytes => bytes.byteLength)
 
 const hash = view => createHash('sha256').update(view).digest()
 const digests = views.map(view => hash(view))
@@ -174,6 +199,48 @@ for (let i = 0; i < digests.length; i++) {
   inmem.insert({ digest, block: [ view ] })
 }
 
+inmem = new InMemory()
+
+let start = performance.now()
+for (let i = 0; i < digests.length; i++) {
+  const digest = digests[i]
+  const view = views[i]
+  inmem.insert({ digest, block: [ view ] })
+}
+let end = performance.now()
+
 inmem.verify()
+
+console.log(digests.length, 'BlockBox inserts in', end - start + 'ms')
+
+const strings = digests.map(d => d.toString('base64'))
+
+const map = new Map()
+start = performance.now()
+for (let i = 0; i < strings.length; i++) {
+  map.set(strings[i], [ views[i] ])
+}
+end = performance.now()
+
+console.log(digests.length, 'Map() inserts in', end - start + 'ms')
+
+start = performance.now()
+
+for (let i = 0; i < digests.length; i++) {
+  const digest = digests[i]
+  inmem.has(digest)
+}
+
+end = performance.now()
+
+console.log(digests.length, 'BlockSet() positive inclusion checks in', end - start + 'ms')
+
+start = performance.now()
+for (let i = 0; i < strings.length; i++) {
+  map.has(strings[i])
+}
+end = performance.now()
+
+console.log(digests.length, 'Map() positive inclusion checks in', end - start + 'ms')
 
 
