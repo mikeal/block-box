@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "blake3-multihash": "^0.0.4",
     "varint-vectors": "^1.0.1"
   }
 }
