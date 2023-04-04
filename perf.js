@@ -1,17 +1,11 @@
-import { createHash, randomBytes } from 'node:crypto'
 import { InMemory } from './lib/inmem.js'
+import fixture from './tests/fixture.js'
 
 let inmem = new InMemory()
+let budget = []
+inmem.spend = n => budget.push(n)
 
-const slab = randomBytes(1024 * 2)
-const range = size => [...Array(size).keys()]
-
-const views = range(slab.byteLength - 1).flatMap(i => {
-  return range(i).map(l => slab.subarray(i, l))
-})
-
-const hash = view => createHash('sha256').update(view).digest()
-const digests = views.map(view => hash(view))
+const { digests, slab, range, views } = fixture(100)
 
 console.log('created', digests.length, 'hashes')
 
@@ -22,6 +16,8 @@ for (let i = 0; i < digests.length; i++) {
 }
 
 inmem = new InMemory()
+budget = []
+inmem.spend = n => budget.push(n)
 
 let start = performance.now()
 for (let i = 0; i < digests.length; i++) {
@@ -33,7 +29,10 @@ let end = performance.now()
 
 inmem.verify()
 
-console.log(digests.length, 'BlockBox inserts in', end - start + 'ms')
+console.log(budget.length, 'budgeted operations executed')
+let spent = budget.reduce((x,y) => x + y, 0)
+
+console.log(digests.length, 'BlockBox inserts in', end - start + 'ms', 'with', spent, 'tracked')
 
 const strings = digests.map(d => d.toString('base64'))
 
