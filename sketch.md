@@ -9,7 +9,7 @@ The Proof Space contains everything in the encode space as well as resulting cry
 Anyone who knows the protocol can produce the Proof Space from the Encode Space,
 so agreement upon the hash digest of the Proof Space is proof of work in the creation of useful derivative proofs.
 
-* Box
+# Box
   * Encode Space.
     * ByteList: List of variable sized bytes (block values).
   * Proof Space:
@@ -33,7 +33,7 @@ to future hash functions or other BlockSet() formats pretty easily from nothing 
 hash digests of the ByteList a very portable means of identificable between these variations of hash functions
 in the network.
 
-* BoxBox
+# BoxBox
 
 Boxes in Boxes.
 
